@@ -52,6 +52,15 @@ npm run dev
 
 http://localhost:3000 — данные из **локального** Postgres.
 
+### view-db (тест)
+
+```powershell
+npm run dev
+# откройте http://localhost:3000/view-db
+```
+
+Выбор локальной или рабочей БД (`DATABASE_URL_LOCAL` / `DATABASE_URL_REMOTE`), список таблиц, пагинация и CRUD. Только в `development`.
+
 ## Переменные окружения
 
 | Переменная | Local | Vercel (Neon) |
