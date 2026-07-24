@@ -37,7 +37,9 @@ export default async function HomePage({ searchParams }: HomePageProps) {
         <h1>PhraseStore</h1>
         <p className={styles.lead}>
           Данные из PostgreSQL через Prisma. Выберите таблицу.{" "}
-          <Link href="/view-db">Открыть view-db →</Link>
+          <Link href="/view-db">view-db</Link>
+          {" · "}
+          <Link href="/login">Войти через Google</Link>
         </p>
       </header>
 

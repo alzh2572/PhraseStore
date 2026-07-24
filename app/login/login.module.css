@@ -1,0 +1,38 @@
+.main {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+}
+
+.card {
+  width: min(100%, 26rem);
+  padding: 2rem 1.5rem;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.card h1 {
+  margin: 0 0 0.4rem;
+  font-size: 2rem;
+}
+
+.lead {
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+}
+
+.googleBtn {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--fg);
+  padding: 0.75rem 1rem;
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.googleBtn:hover {
+  border-color: var(--accent);
+}

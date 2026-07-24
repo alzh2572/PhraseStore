@@ -52,6 +52,16 @@ npm run dev
 
 http://localhost:3000 — данные из **локального** Postgres.
 
+### Auth (Google OAuth)
+
+```powershell
+# В .env: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, AUTH_SECRET, AUTH_URL
+npm run dev
+# http://localhost:3000/login
+```
+
+Защищены middleware: `/dashboard`, `/my-phrases`. Сессии — database (таблица `Session`).
+
 ### view-db (тест)
 
 ```powershell
