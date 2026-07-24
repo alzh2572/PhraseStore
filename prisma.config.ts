@@ -8,7 +8,8 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    // Direct URL (без -pooler) — для migrate / db push
+    // Локально: тот же Postgres, что и DATABASE_URL
+    // На Vercel: Neon Direct URL (без -pooler)
     url: env("DATABASE_URL_UNPOOLED"),
   },
 });

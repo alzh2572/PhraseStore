@@ -2,17 +2,13 @@ import "dotenv/config";
 import { createHash, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import { PrismaClient } from "../lib/generated/prisma";
+import { createPrismaClient } from "../lib/create-prisma-client";
 
+/** Аварийный способ применить init-миграцию, если migrate CLI недоступен. */
 const MIGRATION_NAME = "20260724120000_init";
 
 async function main() {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) throw new Error("DATABASE_URL missing");
-
-  const adapter = new PrismaNeon({ connectionString });
-  const prisma = new PrismaClient({ adapter });
+  const prisma = createPrismaClient();
 
   try {
     const sqlPath = join(

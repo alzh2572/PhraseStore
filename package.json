@@ -8,21 +8,24 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
+    "db:setup": "tsx scripts/ensure-local-db.ts && prisma migrate deploy && tsx prisma/seed.ts",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "db:apply": "tsx scripts/apply-migration.ts",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/adapter-neon": "^7.9.0",
+    "@prisma/adapter-pg": "^7.9.0",
     "@prisma/client": "^7.9.0",
     "next": "^16.2.11",
+    "pg": "^8.22.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@types/node": "^20.19.43",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "dotenv": "^17.4.2",

@@ -1,15 +1,8 @@
 import "dotenv/config";
 import { randomUUID } from "node:crypto";
-import { PrismaNeon } from "@prisma/adapter-neon";
-import { PrismaClient } from "../lib/generated/prisma";
+import { createPrismaClient } from "../lib/create-prisma-client";
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error("DATABASE_URL is not set");
-}
-
-const adapter = new PrismaNeon({ connectionString });
-const prisma = new PrismaClient({ adapter });
+const prisma = createPrismaClient();
 
 async function main() {
   const count = await prisma.note.count();
@@ -18,12 +11,14 @@ async function main() {
     return;
   }
 
-  await prisma.note.createMany({
-    data: [
-      { id: randomUUID(), title: "Первая заметка" },
-      { id: randomUUID(), title: "Hello from Neon + Prisma" },
-      { id: randomUUID(), title: "Готово к деплою на Vercel" },
-    ],
+  await prisma.note.create({
+    data: { id: randomUUID(), title: "Первая заметка" },
+  });
+  await prisma.note.create({
+    data: { id: randomUUID(), title: "Hello from Neon + Prisma" },
+  });
+  await prisma.note.create({
+    data: { id: randomUUID(), title: "Готово к деплою на Vercel" },
   });
 
   console.log("Seeded 3 notes");

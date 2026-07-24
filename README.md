@@ -1,72 +1,77 @@
 # PhraseStore
 
-Минимальный Next.js (App Router) + Prisma 7 + Neon (PostgreSQL), готовый к деплою на Vercel.
-
-## Стек
-
-- Next.js + TypeScript (App Router)
-- Prisma ORM 7 + `@prisma/adapter-neon`
-- NeonDB (PostgreSQL)
+Минимальный Next.js (App Router) + Prisma 7 + PostgreSQL.
+Локально — Postgres, в продакшене — Neon (Vercel).
 
 ## Сущность
 
 `Note`: `id` (uuid), `title` (string), `createdAt` (DateTime)
 
+## Workflow Prisma (обязательный порядок)
+
+Когда нужно поменять схему БД:
+
+1. Меняем `prisma/schema.prisma`
+2. Запускаем `prisma migrate dev` (локальная БД)
+3. Проверяем локально (`npm run dev`)
+4. Коммитим файлы миграции в `prisma/migrations/`
+5. На рабочей БД (Vercel build / вручную) — `prisma migrate deploy`
+6. Проверяем работу на Neon / production
+
+```powershell
+# 1–2. Изменили schema.prisma, затем:
+npx prisma migrate dev --name describe_change
+
+# 3. Локальная проверка
+npm run db:seed   # при необходимости
+npm run dev
+
+# 4. git add prisma/migrations ; git commit ...
+
+# 5. На Vercel выполняется автоматически в npm run build
+#    или вручную с prod-переменными:
+npx prisma migrate deploy
+```
+
 ## Быстрый старт (PowerShell)
 
 ```powershell
-# 1. Зависимости
 npm install
 
-# 2. Env
+# Локальный Postgres (если ещё нет)
+# Вариант A — уже установленный Postgres на :5432
+# Вариант B — Docker:
+docker compose up -d
+
 Copy-Item .env.example .env
-# В Neon Console скопируйте:
-# - Pooled URL  -> DATABASE_URL          (есть -pooler в хосте)
-# - Direct URL  -> DATABASE_URL_UNPOOLED (без -pooler)
+# В .env уже указан localhost. Neon — только в Vercel.
 
-# 3. Миграция
-# Вариант A — стандартный Prisma CLI (нужен рабочий Direct URL):
-npx prisma migrate dev --name init
-
-# Вариант B — через Neon serverless adapter (если migrate по TCP падает):
-npm run db:apply
-
-# 4. Seed
-npm run db:seed
-
-# 5. Локальный сервер
+npm run db:setup
 npm run dev
 ```
 
-Откройте http://localhost:3000 — главная читает заметки из Neon.
+http://localhost:3000 — данные из **локального** Postgres.
 
 ## Переменные окружения
 
-| Переменная | Назначение |
-|---|---|
-| `DATABASE_URL` | Pooled URL (`-pooler`) — runtime приложения |
-| `DATABASE_URL_UNPOOLED` | Direct URL — Prisma Migrate / CLI |
+| Переменная | Local | Vercel (Neon) |
+|---|---|---|
+| `DATABASE_URL` | `localhost:5432/phrasestore` | pooled URL (`-pooler`) |
+| `DATABASE_URL_UNPOOLED` | тот же local URL | direct URL (без `-pooler`) |
 
-На Vercel: **Project Settings → Environment Variables** — те же ключи.
+Приложение само выбирает адаптер: `pg` для localhost, `@prisma/adapter-neon` для Neon.
 
 ## Деплой на Vercel
 
-```powershell
-npm i -g vercel
-vercel
-```
+В **Environment Variables** задайте Neon URLs (не local).
 
-Или подключите GitHub-репозиторий в Vercel Dashboard.
+`build`: `prisma generate` → `prisma migrate deploy` → `next build`
 
-Скрипт `build`: `prisma generate` → `prisma migrate deploy` → `next build`
-
-## Полезные команды
+## Команды
 
 ```powershell
-npm run db:migrate   # prisma migrate dev
-npm run db:deploy    # prisma migrate deploy
-npm run db:apply     # применить SQL через Neon adapter
-npm run db:seed      # заполнить Note
-npm run db:studio    # Prisma Studio
-npm run build        # production build
+npm run db:migrate   # prisma migrate dev  (локально)
+npm run db:deploy    # prisma migrate deploy (prod / Neon)
+npm run db:seed
+npm run db:studio
 ```
