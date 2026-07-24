@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth, signIn } from "@/auth";
+import { auth } from "@/auth";
 import styles from "./login/login.module.css";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,15 @@ export default async function HomePage({ searchParams }: HomePageProps) {
 
   const { error } = await searchParams;
 
+  const errorText =
+    error === "Configuration"
+      ? "Ошибка конфигурации Auth.js. Проверьте GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, AUTH_SECRET и AUTH_URL на Vercel."
+      : error === "AccessDenied"
+        ? "Доступ запрещён Google."
+        : error
+          ? `Ошибка входа (${error}). Для Vercel: AUTH_URL=https://phrase-store-five.vercel.app и redirect URI в Google Console.`
+          : null;
+
   return (
     <main className={styles.main}>
       <section className={styles.card}>
@@ -28,23 +38,16 @@ export default async function HomePage({ searchParams }: HomePageProps) {
           Хранилище фраз и цитат. Войдите, чтобы получить доступ к базе данных.
         </p>
 
-        {error ? (
+        {errorText ? (
           <p className={styles.error} role="alert">
-            Ошибка входа ({error}). Проверьте AUTH_URL (порт!), Google redirect
-            URI и GOOGLE_CLIENT_SECRET.
+            {errorText}
           </p>
         ) : null}
 
-        <form
-          action={async () => {
-            "use server";
-            await signIn("google", { redirectTo: "/db" });
-          }}
-        >
-          <button type="submit" className={styles.googleBtn}>
-            Войти через Google
-          </button>
-        </form>
+        {/* Прямой GET на наш handler — полный OAuth URL с response_type=code */}
+        <Link className={styles.googleBtn} href="/api/auth/google">
+          Войти через Google
+        </Link>
       </section>
     </main>
   );

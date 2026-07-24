@@ -1,6 +1,11 @@
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 
+const googleClientId =
+  process.env.GOOGLE_CLIENT_ID ?? process.env.AUTH_GOOGLE_ID ?? "";
+const googleClientSecret =
+  process.env.GOOGLE_CLIENT_SECRET ?? process.env.AUTH_GOOGLE_SECRET ?? "";
+
 /**
  * Edge-safe конфиг (без Prisma).
  * Используется в middleware.ts — Edge Runtime не тянет Node-модули.
@@ -8,13 +13,18 @@ import Google from "next-auth/providers/google";
 export const authConfig = {
   providers: [
     Google({
-      // Поддержка обоих имён переменных (Auth.js / явные)
-      clientId:
-        process.env.GOOGLE_CLIENT_ID ?? process.env.AUTH_GOOGLE_ID,
-      clientSecret:
-        process.env.GOOGLE_CLIENT_SECRET ?? process.env.AUTH_GOOGLE_SECRET,
-      // Если в БД уже есть User с тем же email (seed) — связать аккаунт Google
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
       allowDangerousEmailAccountLinking: true,
+      // Явно требуем authorization code flow (иначе Google: missing response_type)
+      authorization: {
+        params: {
+          response_type: "code",
+          scope: "openid email profile",
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
     }),
   ],
   pages: {
@@ -43,8 +53,6 @@ export const authConfig = {
       return true;
     },
   },
-  // Критично для localhost / Vercel preview: доверять Host из запроса
   trustHost: true,
-  // В dev смотрите логи [auth][error] в терминале
   debug: process.env.NODE_ENV === "development",
 } satisfies NextAuthConfig;

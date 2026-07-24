@@ -23,7 +23,11 @@
 }
 
 .googleBtn {
+  display: block;
   width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  text-decoration: none;
   border: 1px solid var(--line);
   background: #fff;
   color: var(--fg);
