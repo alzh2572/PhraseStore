@@ -1,0 +1,124 @@
+.main {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+.header h1 {
+  margin: 0 0 0.35rem;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  letter-spacing: -0.02em;
+}
+
+.lead {
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.tab,
+.tabActive {
+  display: inline-block;
+  padding: 0.45rem 0.85rem;
+  text-decoration: none;
+  border: 1px solid var(--line);
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.45);
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.9rem;
+}
+
+.tab:hover {
+  border-color: var(--accent);
+}
+
+.tabActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #f7f3ea;
+}
+
+.panel {
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+}
+
+.panelHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.panelHead h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+}
+
+.count {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.scroll {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th,
+.table td {
+  padding: 0.55rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+  white-space: nowrap;
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table th {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-weight: 600;
+  background: rgba(15, 92, 76, 0.06);
+  position: sticky;
+  top: 0;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.empty,
+.error {
+  margin: 0;
+  padding: 1rem 0;
+}
+
+.empty {
+  color: var(--muted);
+}
+
+.error {
+  color: #8a1f1f;
+  border: 1px solid #e2b4b4;
+  background: #fff5f5;
+  padding: 1rem;
+  border-radius: 8px;
+}
