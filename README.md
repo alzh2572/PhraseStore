@@ -60,7 +60,8 @@ npm run dev
 # http://localhost:3000/login
 ```
 
-Защищены middleware: `/dashboard`, `/my-phrases`. Сессии — database (таблица `Session`).
+Защищены middleware: `/dashboard`, `/my-phrases`.  
+Сессии: JWT (совместимо с Edge middleware) + Prisma Adapter (User в БД при первом входе).
 
 ### view-db (тест)
 

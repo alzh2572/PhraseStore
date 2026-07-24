@@ -4,28 +4,34 @@ import { authConfig } from "@/auth.config";
 import { prisma } from "@/lib/prisma";
 
 /**
- * Auth.js (NextAuth v5) + Google OAuth + Prisma.
- * session.strategy = "database" → server-side сессии в таблице Session.
- * При первом входе адаптер создаёт User (+ Account) в PostgreSQL.
+ * Auth.js + Google OAuth + Prisma Adapter.
+ *
+ * Важно: session.strategy = "jwt" — чтобы middleware работал на Edge
+ * без Prisma (иначе ошибка node:util/types).
+ *
+ * Адаптер всё равно создаёт User/Account в БД при первом входе;
+ * стабильный user.id кладём в JWT → session.user.id.
  */
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
-  // Prisma 7 + driver adapter: типы адаптера Auth.js ещё ожидают классический client
+  // Prisma 7 + driver adapter: Auth.js типы ещё под классический client
   adapter: PrismaAdapter(prisma as never),
   session: {
-    strategy: "database",
-    // 30 дней
+    strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60,
   },
   callbacks: {
     ...authConfig.callbacks,
-    /**
-     * Пробрасываем стабильный user.id из БД в session.user.id
-     * (по умолчанию в session его может не быть).
-     */
-    async session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
+    async jwt({ token, user }) {
+      // Первый вход: user приходит из адаптера с id из таблицы User
+      if (user?.id) {
+        token.sub = user.id;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user && token.sub) {
+        session.user.id = token.sub;
       }
       return session;
     },

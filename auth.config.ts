@@ -2,8 +2,8 @@ import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 
 /**
- * Edge-совместимая часть конфига (providers, pages, базовые callbacks).
- * Prisma adapter подключается в auth.ts — там же database sessions.
+ * Edge-safe конфиг (без Prisma).
+ * Используется в middleware.ts — Edge Runtime не тянет Node-модули.
  */
 export const authConfig = {
   providers: [
@@ -17,8 +17,8 @@ export const authConfig = {
   },
   callbacks: {
     /**
-     * Используется middleware: решаем, пускать ли на защищённый маршрут.
-     * req.auth заполняется Auth.js (для database sessions — через cookie + lookup).
+     * Middleware: пускать ли на защищённый маршрут.
+     * При false Auth.js сам редиректит на pages.signIn (/login).
      */
     authorized({ auth, request }) {
       const { pathname } = request.nextUrl;
@@ -32,7 +32,6 @@ export const authConfig = {
         return isLoggedIn;
       }
 
-      // Уже вошёл → со /login сразу в кабинет
       if (pathname.startsWith("/login") && isLoggedIn) {
         return Response.redirect(new URL("/dashboard", request.nextUrl));
       }

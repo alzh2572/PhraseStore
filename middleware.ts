@@ -1,32 +1,11 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import NextAuth from "next-auth";
+import { authConfig } from "@/auth.config";
 
 /**
- * Защита маршрутов через Auth.js.
- * Сессия читается server-side (таблица Session) → стабильный userId.
- *
- * /dashboard, /my-phrases — только для авторизованных.
- * /login — если уже вошёл, редирект в кабинет.
+ * Middleware только с authConfig (без Prisma / Node-native модулей).
+ * Не импортируйте сюда @/auth или @/lib/prisma — сломается Edge Runtime.
  */
-export default auth((req) => {
-  const { pathname } = req.nextUrl;
-  const isLoggedIn = !!req.auth?.user;
-
-  const isProtected =
-    pathname.startsWith("/dashboard") || pathname.startsWith("/my-phrases");
-
-  if (isProtected && !isLoggedIn) {
-    const loginUrl = new URL("/login", req.nextUrl.origin);
-    loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  if (pathname.startsWith("/login") && isLoggedIn) {
-    return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin));
-  }
-
-  return NextResponse.next();
-});
+export default NextAuth(authConfig).auth;
 
 export const config = {
   matcher: ["/dashboard/:path*", "/my-phrases/:path*", "/login"],
