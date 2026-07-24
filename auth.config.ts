@@ -8,23 +8,27 @@ import Google from "next-auth/providers/google";
 export const authConfig = {
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      // Поддержка обоих имён переменных (Auth.js / явные)
+      clientId:
+        process.env.GOOGLE_CLIENT_ID ?? process.env.AUTH_GOOGLE_ID,
+      clientSecret:
+        process.env.GOOGLE_CLIENT_SECRET ?? process.env.AUTH_GOOGLE_SECRET,
+      // Если в БД уже есть User с тем же email (seed) — связать аккаунт Google
+      allowDangerousEmailAccountLinking: true,
     }),
   ],
   pages: {
-    signIn: "/login",
+    signIn: "/",
+    error: "/",
   },
   callbacks: {
-    /**
-     * Middleware: пускать ли на защищённый маршрут.
-     * При false Auth.js сам редиректит на pages.signIn (/login).
-     */
     authorized({ auth, request }) {
       const { pathname } = request.nextUrl;
       const isLoggedIn = !!auth?.user;
 
       const isProtected =
+        pathname.startsWith("/db") ||
+        pathname.startsWith("/view-db") ||
         pathname.startsWith("/dashboard") ||
         pathname.startsWith("/my-phrases");
 
@@ -32,12 +36,15 @@ export const authConfig = {
         return isLoggedIn;
       }
 
-      if (pathname.startsWith("/login") && isLoggedIn) {
-        return Response.redirect(new URL("/dashboard", request.nextUrl));
+      if ((pathname === "/" || pathname.startsWith("/login")) && isLoggedIn) {
+        return Response.redirect(new URL("/db", request.nextUrl));
       }
 
       return true;
     },
   },
+  // Критично для localhost / Vercel preview: доверять Host из запроса
   trustHost: true,
+  // В dev смотрите логи [auth][error] в терминале
+  debug: process.env.NODE_ENV === "development",
 } satisfies NextAuthConfig;

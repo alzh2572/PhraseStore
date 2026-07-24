@@ -1,101 +1,51 @@
-import Link from "next/link";
-import {
-  APP_TABLES,
-  fetchTableRows,
-  isAppTable,
-  type AppTable,
-} from "@/lib/tables";
-import styles from "./page.module.css";
+import { redirect } from "next/navigation";
+import { auth, signIn } from "@/auth";
+import styles from "./login/login.module.css";
 
 export const dynamic = "force-dynamic";
 
 type HomePageProps = {
-  searchParams: Promise<{ table?: string }>;
+  searchParams: Promise<{ error?: string }>;
 };
 
+/**
+ * Стартовый экран: название программы + вход через Google.
+ * После авторизации — доступ к БД (/db).
+ */
 export default async function HomePage({ searchParams }: HomePageProps) {
-  const params = await searchParams;
-  const requested = params.table ?? "Note";
-  const table: AppTable = isAppTable(requested) ? requested : "Note";
-
-  let columns: string[] = [];
-  let rows: Record<string, unknown>[] = [];
-  let errorMessage: string | null = null;
-
-  try {
-    const data = await fetchTableRows(table);
-    columns = data.columns;
-    rows = data.rows;
-  } catch (error) {
-    errorMessage =
-      error instanceof Error ? error.message : "Не удалось загрузить таблицу";
+  const session = await auth();
+  if (session?.user) {
+    redirect("/db");
   }
+
+  const { error } = await searchParams;
 
   return (
     <main className={styles.main}>
-      <header className={styles.header}>
+      <section className={styles.card}>
         <h1>PhraseStore</h1>
         <p className={styles.lead}>
-          Данные из PostgreSQL через Prisma. Выберите таблицу.{" "}
-          <Link href="/view-db">view-db</Link>
-          {" · "}
-          <Link href="/login">Войти через Google</Link>
+          Хранилище фраз и цитат. Войдите, чтобы получить доступ к базе данных.
         </p>
-      </header>
 
-      <nav className={styles.tabs} aria-label="Таблицы">
-        {APP_TABLES.map((name) => (
-          <Link
-            key={name}
-            href={`/?table=${name}`}
-            className={name === table ? styles.tabActive : styles.tab}
-            prefetch={false}
-          >
-            {name}
-          </Link>
-        ))}
-      </nav>
+        {error ? (
+          <p className={styles.error} role="alert">
+            Ошибка входа ({error}). Проверьте AUTH_URL (порт!), Google redirect
+            URI и GOOGLE_CLIENT_SECRET.
+          </p>
+        ) : null}
 
-      <section className={styles.panel}>
-        <div className={styles.panelHead}>
-          <h2>{table}</h2>
-          <span className={styles.count}>
-            {errorMessage ? "—" : `${rows.length} строк`}
-          </span>
-        </div>
-
-        {errorMessage ? (
-          <p className={styles.error}>{errorMessage}</p>
-        ) : rows.length === 0 ? (
-          <p className={styles.empty}>Таблица пуста.</p>
-        ) : (
-          <div className={styles.scroll}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  {columns.map((col) => (
-                    <th key={col}>{col}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row, index) => (
-                  <tr key={String(row.id ?? `${table}-${index}`)}>
-                    {columns.map((col) => (
-                      <td key={col}>{formatCell(row[col])}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <form
+          action={async () => {
+            "use server";
+            await signIn("google", { redirectTo: "/db" });
+          }}
+        >
+          <button type="submit" className={styles.googleBtn}>
+            Войти через Google
+          </button>
+        </form>
       </section>
     </main>
   );
-}
-
-function formatCell(value: unknown): string {
-  if (value === null || value === undefined) return "—";
-  return String(value);
 }

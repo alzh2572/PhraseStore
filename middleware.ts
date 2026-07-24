@@ -2,11 +2,17 @@ import NextAuth from "next-auth";
 import { authConfig } from "@/auth.config";
 
 /**
- * Middleware только с authConfig (без Prisma / Node-native модулей).
- * Не импортируйте сюда @/auth или @/lib/prisma — сломается Edge Runtime.
+ * Middleware только с authConfig (без Prisma).
+ * Защищает доступ к БД и кабинету до авторизации.
  */
 export default NextAuth(authConfig).auth;
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/my-phrases/:path*", "/login"],
+  matcher: [
+    "/db/:path*",
+    "/view-db/:path*",
+    "/dashboard/:path*",
+    "/my-phrases/:path*",
+    "/login",
+  ],
 };

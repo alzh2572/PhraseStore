@@ -24,8 +24,8 @@ export default async function MyPhrasesPage() {
             Приватные фразы видите только вы. Публичные — все пользователи.
           </p>
         </div>
-        <Link className={styles.btn} href="/dashboard">
-          Кабинет
+        <Link className={styles.btn} href="/db">
+          БД
         </Link>
       </header>
 

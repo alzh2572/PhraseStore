@@ -64,8 +64,8 @@ export default async function DashboardPage() {
       </section>
 
       <nav className={styles.nav}>
+        <Link href="/db">База данных →</Link>
         <Link href="/my-phrases">Мои фразы →</Link>
-        <Link href="/">На главную</Link>
       </nav>
     </main>
   );

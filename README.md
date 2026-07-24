@@ -54,13 +54,17 @@ http://localhost:3000 — данные из **локального** Postgres.
 
 ### Auth (Google OAuth)
 
+Сценарий:
+1. `/` — название **PhraseStore** + кнопка «Войти через Google»
+2. После входа — доступ к БД: `/db` (таблицы), `/view-db` (CRUD)
+
 ```powershell
 # В .env: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, AUTH_SECRET, AUTH_URL
 npm run dev
-# http://localhost:3000/login
+# http://localhost:3000
 ```
 
-Защищены middleware: `/dashboard`, `/my-phrases`.  
+Защищены middleware: `/db`, `/view-db`, `/dashboard`, `/my-phrases`.  
 Сессии: JWT (совместимо с Edge middleware) + Prisma Adapter (User в БД при первом входе).
 
 ### view-db (тест)

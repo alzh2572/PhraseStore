@@ -48,8 +48,8 @@ function ViewDbHome() {
 
   return (
     <main className={styles.main}>
-      <Link className={styles.backLink} href="/">
-        ← На главную
+      <Link className={styles.backLink} href="/db">
+        ← К базе данных
       </Link>
 
       <header className={styles.header}>

@@ -18,41 +18,42 @@ export default async function RootLayout({
   return (
     <html lang="ru">
       <body>
-        <header
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: "1rem",
-            alignItems: "center",
-            maxWidth: "72rem",
-            margin: "0 auto",
-            padding: "1rem 1.25rem 0",
-          }}
-        >
-          <Link href="/" style={{ textDecoration: "none", fontWeight: 700 }}>
-            PhraseStore
-          </Link>
-          <nav style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-            {session?.user ? (
-              <>
-                <Link href="/dashboard">Кабинет</Link>
-                <Link href="/my-phrases">Мои фразы</Link>
-                <form
-                  action={async () => {
-                    "use server";
-                    await signOut({ redirectTo: "/" });
-                  }}
-                >
-                  <button type="submit" style={{ cursor: "pointer" }}>
-                    Выйти
-                  </button>
-                </form>
-              </>
-            ) : (
-              <Link href="/login">Войти</Link>
-            )}
-          </nav>
-        </header>
+        {/* Шапка только после входа — на старте только название + кнопка Google */}
+        {session?.user ? (
+          <header
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: "1rem",
+              alignItems: "center",
+              maxWidth: "72rem",
+              margin: "0 auto",
+              padding: "1rem 1.25rem 0",
+            }}
+          >
+            <Link href="/db" style={{ textDecoration: "none", fontWeight: 700 }}>
+              PhraseStore
+            </Link>
+            <nav
+              style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}
+            >
+              <Link href="/db">БД</Link>
+              <Link href="/view-db">view-db</Link>
+              <Link href="/dashboard">Кабинет</Link>
+              <Link href="/my-phrases">Мои фразы</Link>
+              <form
+                action={async () => {
+                  "use server";
+                  await signOut({ redirectTo: "/" });
+                }}
+              >
+                <button type="submit" style={{ cursor: "pointer" }}>
+                  Выйти
+                </button>
+              </form>
+            </nav>
+          </header>
+        ) : null}
         {children}
       </body>
     </html>
