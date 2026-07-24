@@ -23,7 +23,7 @@ visibility (PRIVATE|PUBLIC, default PRIVATE), createdAt, updatedAt, publishedAt 
 * Vote: id, userId -> User, phraseId -> Phrase, value int default 1, createdAt
 * Category: id, category
 * Ограничение: один пользователь может проголосовать за фразу/цитату только один раз:
-UNIQUE(userId, promptId)
+UNIQUE(userId, phraseId)
 * Индексы:
 Phrase(ownerId, updatedAt)
 Phrase(visibility, createdAt)

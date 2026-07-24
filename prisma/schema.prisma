@@ -7,8 +7,86 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Visibility {
+  PRIVATE
+  PUBLIC
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+
+  notes   Note[]
+  phrases Phrase[]
+  votes   Vote[]
+}
+
 model Note {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   title     String
   createdAt DateTime @default(now())
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+
+  @@index([ownerId])
+}
+
+model Category {
+  id       String   @id @default(cuid())
+  category String
+  phrases  Phrase[]
+}
+
+model Phrase {
+  id          String      @id @default(cuid())
+  title       String
+  content     String
+  description String?
+  visibility  Visibility  @default(PRIVATE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  publishedAt DateTime?
+
+  ownerId    String
+  owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  votes Vote[]
+  tags  PhraseTag[]
+
+  @@index([ownerId, updatedAt])
+  @@index([visibility, createdAt])
+}
+
+model Tag {
+  id      String      @id @default(cuid())
+  name    String      @unique
+  phrases PhraseTag[]
+}
+
+model PhraseTag {
+  phraseId String
+  tagId    String
+  phrase   Phrase @relation(fields: [phraseId], references: [id], onDelete: Cascade)
+  tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([phraseId, tagId])
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  value     Int      @default(1)
+  createdAt DateTime @default(now())
+
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phraseId String
+  phrase   Phrase @relation(fields: [phraseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, phraseId])
+  @@index([phraseId])
+  @@index([userId])
 }

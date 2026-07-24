@@ -1,27 +1,28 @@
 import "dotenv/config";
-import { randomUUID } from "node:crypto";
 import { createPrismaClient } from "../lib/create-prisma-client";
 
 const prisma = createPrismaClient();
 
 async function main() {
-  const count = await prisma.note.count();
-  if (count > 0) {
-    console.log(`Seed skipped: already ${count} note(s)`);
-    return;
+  const user = await prisma.user.upsert({
+    where: { email: "seed@phrasestore.local" },
+    update: {},
+    create: { email: "seed@phrasestore.local", name: "Seed User" },
+  });
+
+  const noteCount = await prisma.note.count();
+  if (noteCount === 0) {
+    await prisma.note.createMany({
+      data: [
+        { title: "Первая заметка", ownerId: user.id },
+        { title: "Hello from Neon + Prisma", ownerId: user.id },
+        { title: "Готово к деплою на Vercel", ownerId: user.id },
+      ],
+    });
+    console.log("Seeded 3 notes");
+  } else {
+    console.log(`Seed skipped: already ${noteCount} note(s)`);
   }
-
-  await prisma.note.create({
-    data: { id: randomUUID(), title: "Первая заметка" },
-  });
-  await prisma.note.create({
-    data: { id: randomUUID(), title: "Hello from Neon + Prisma" },
-  });
-  await prisma.note.create({
-    data: { id: randomUUID(), title: "Готово к деплою на Vercel" },
-  });
-
-  console.log("Seeded 3 notes");
 }
 
 main()
