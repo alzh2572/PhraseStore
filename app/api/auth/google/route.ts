@@ -18,5 +18,5 @@ export async function GET() {
   }
 
   // signIn бросает REDIRECT на Google с полным набором query (response_type=code и т.д.)
-  await signIn("google", { redirectTo: "/db" });
+  await signIn("google", { redirectTo: "/dashboard" });
 }
