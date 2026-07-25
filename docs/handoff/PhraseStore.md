@@ -2,10 +2,10 @@
 
 ## Что делать дальше (по приоритету)
 
-1. **Добить Google OAuth на Vercel** — в ошибке Google явно видно, что приложение шлёт callback как `http://phrase-store-five.vercel.app/...`, а нужен **`https://`**. В Vercel Production Env выставить `AUTH_URL=https://phrase-store-five.vercel.app` (без слэша), Redeploy. В Google Console → Authorized redirect URIs добавить **точно** `https://phrase-store-five.vercel.app/api/auth/callback/google` (+ localhost для dev). Пока это не совпадёт — вход на проде не заработает.
-2. **Проверить полный happy-path на проде после фикса URI**: `/` → Google → `/db` → данные из Neon; выход; повторный вход; `/my-phrases` / `/dashboard` под middleware.
-3. **Прогнать `prisma migrate deploy` на Neon с Vercel build** — история `_prisma_migrations` на Neon уже вручную выровнена под репо; после следующего успешного деплоя убедиться, что build больше не падает на `P3009`.
-4. **Продуктовый слой поверх auth** (осознанно не начат): создание/редактирование своих Phrase в UI, публичная лента, голосование с проверкой PUBLIC, нормальный UX кабинета вместо «сырого» просмотра всех таблиц.
+1. **Добить Google OAuth на Vercel** — `AUTH_URL=https://phrase-store-five.vercel.app`, redirect URI в Google Console, Redeploy.
+2. **Проверить happy-path на проде**: `/` → Google → `/dashboard` → CRUD фраз; public/favorite.
+3. **Убедиться, что `prisma migrate deploy` на Neon** применяет `20260725180000_phrase_cabinet` без `P3009`.
+4. Доработать History / Settings; голосование; публичная витрина вне кабинета.
 
 ---
 
@@ -35,10 +35,12 @@ Production URL проекта на Vercel: **https://phrase-store-five.vercel.ap
 
 ## Сделано 25.07.26
 
-- **view-db вынесен из основного приложения** в отдельный локальный инструмент `tools/view-db`.
-  - Запуск: `npm run view-db` → `http://127.0.0.1:3010` (bind только localhost).
-  - Удалены маршруты `/view-db`, ссылки в nav/`/db`, matcher в middleware и `auth.config`.
-  - На Vercel CRUD к БД больше не входит в бандл PhraseStore.
+- **view-db** вынесен в `tools/view-db` (`npm run view-db` → `:3010`).
+- **Личный кабинет** по референсу UI-program.png:
+  - Tailwind + shadcn-подобные UI + lucide
+  - `/dashboard`, `/public`, `/favorites`, `/history`, `/settings`, `/profile`
+  - Phrase: `isPublic`, `isFavorite`; CRUD server actions + zod
+  - миграция `20260725180000_phrase_cabinet`
 
 ---
 

@@ -9,7 +9,7 @@ type Props = {
   searchParams: Promise<{ q?: string; page?: string }>;
 };
 
-export default async function DashboardPhrasesPage({ searchParams }: Props) {
+export default async function PublicPhrasesPage({ searchParams }: Props) {
   const session = await auth();
   if (!session?.user?.id) redirect("/");
 
@@ -18,7 +18,7 @@ export default async function DashboardPhrasesPage({ searchParams }: Props) {
   const q = params.q?.trim() || undefined;
 
   const result = await listPhrasesForDashboard({
-    mode: "mine",
+    mode: "public",
     userId: session.user.id,
     page,
     q,
@@ -26,9 +26,9 @@ export default async function DashboardPhrasesPage({ searchParams }: Props) {
 
   return (
     <PhrasesWorkspace
-      title="Мои фразы/цитаты"
-      showCreate
-      basePath="/dashboard"
+      title="Публичные фразы/цитаты"
+      subtitle="Все фразы с isPublic = true. Свои можно править и удалять."
+      basePath="/dashboard/public"
       currentUserId={session.user.id}
       phrases={result.items.map((p) => ({
         id: p.id,
@@ -44,6 +44,8 @@ export default async function DashboardPhrasesPage({ searchParams }: Props) {
       totalPages={result.totalPages}
       total={result.total}
       q={q}
+      emptyTitle="Пока нет публичных фраз"
+      emptyDescription="Сделайте одну из своих фраз публичной — она появится здесь."
     />
   );
 }

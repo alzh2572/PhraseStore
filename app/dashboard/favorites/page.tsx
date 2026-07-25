@@ -9,7 +9,7 @@ type Props = {
   searchParams: Promise<{ q?: string; page?: string }>;
 };
 
-export default async function DashboardPhrasesPage({ searchParams }: Props) {
+export default async function FavoritesPage({ searchParams }: Props) {
   const session = await auth();
   if (!session?.user?.id) redirect("/");
 
@@ -18,7 +18,7 @@ export default async function DashboardPhrasesPage({ searchParams }: Props) {
   const q = params.q?.trim() || undefined;
 
   const result = await listPhrasesForDashboard({
-    mode: "mine",
+    mode: "favorites",
     userId: session.user.id,
     page,
     q,
@@ -26,9 +26,10 @@ export default async function DashboardPhrasesPage({ searchParams }: Props) {
 
   return (
     <PhrasesWorkspace
-      title="Мои фразы/цитаты"
+      title="Избранное"
+      subtitle="Ваши фразы, отмеченные звездой."
       showCreate
-      basePath="/dashboard"
+      basePath="/dashboard/favorites"
       currentUserId={session.user.id}
       phrases={result.items.map((p) => ({
         id: p.id,
@@ -44,6 +45,8 @@ export default async function DashboardPhrasesPage({ searchParams }: Props) {
       totalPages={result.totalPages}
       total={result.total}
       q={q}
+      emptyTitle="В избранном пока пусто"
+      emptyDescription="Отметьте фразу звездой в списке «Мои фразы/цитаты»."
     />
   );
 }

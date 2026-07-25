@@ -80,32 +80,38 @@ model Note {
 }
 
 model Category {
-  id       String   @id @default(cuid())
+  id       String    @id @default(cuid())
   category String
   phrases  Phrase[]
 }
 
+/// Фраза / цитата пользователя.
+/// ownerId = userId владельца; isPublic — витрина; isFavorite — избранное владельца.
 model Phrase {
   id          String     @id @default(cuid())
   title       String
   content     String
   description String?
-  /// PUBLIC — видно всем; PRIVATE — только владельцу (ownerId)
+  /// Синхронизируется с isPublic (для старых индексов/запросов)
   visibility  Visibility @default(PRIVATE)
+  isPublic    Boolean    @default(false)
+  isFavorite  Boolean    @default(false)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
   publishedAt DateTime?
 
   ownerId    String
-  owner      User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  owner      User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   votes Vote[]
   tags  PhraseTag[]
 
   @@index([ownerId, updatedAt])
   @@index([visibility, createdAt])
+  @@index([isPublic, createdAt])
+  @@index([ownerId, isFavorite])
 }
 
 model Tag {

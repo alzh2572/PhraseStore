@@ -56,7 +56,8 @@ http://localhost:3000 — данные из **локального** Postgres.
 
 Сценарий:
 1. `/` — название **PhraseStore** + кнопка «Войти через Google»
-2. После входа — доступ к БД: `/db` (read-only таблицы)
+2. После входа — личный кабинет `/dashboard` (CRUD фраз/цитат)
+3. Read-only просмотр таблиц: `/db`
 
 ```powershell
 # В .env: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, AUTH_SECRET, AUTH_URL
@@ -66,6 +67,29 @@ npm run dev
 
 Защищены middleware: `/db`, `/dashboard`, `/my-phrases`.  
 Сессии: JWT (совместимо с Edge middleware) + Prisma Adapter (User в БД при первом входе).
+
+### Личный кабинет
+
+| Маршрут | Содержание |
+|---|---|
+| `/dashboard` | Мои фразы/цитаты (CRUD, избранное, public/private) |
+| `/dashboard/public` | Публичные фразы |
+| `/dashboard/favorites` | Избранное |
+| `/dashboard/history` | Заглушка |
+| `/dashboard/settings` | Заглушка |
+| `/dashboard/profile` | Профиль |
+
+```powershell
+# миграции (локально)
+npx prisma migrate deploy
+# или
+npm run db:migrate
+
+npm run dev
+# http://localhost:3000 → Google → /dashboard
+```
+
+Нужны ENV: `DATABASE_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `AUTH_SECRET`, `AUTH_URL`.
 
 ### view-db (отдельный локальный инструмент)
 

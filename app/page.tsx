@@ -11,12 +11,12 @@ type HomePageProps = {
 
 /**
  * Стартовый экран: название программы + вход через Google.
- * После авторизации — доступ к БД (/db).
+ * После авторизации — личный кабинет.
  */
 export default async function HomePage({ searchParams }: HomePageProps) {
   const session = await auth();
   if (session?.user) {
-    redirect("/db");
+    redirect("/dashboard");
   }
 
   const { error } = await searchParams;
@@ -35,7 +35,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
       <section className={styles.card}>
         <h1>PhraseStore</h1>
         <p className={styles.lead}>
-          Хранилище фраз и цитат. Войдите, чтобы получить доступ к базе данных.
+          Хранилище фраз и цитат. Войдите, чтобы открыть личный кабинет.
         </p>
 
         {errorText ? (
