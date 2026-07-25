@@ -40,6 +40,8 @@ export default async function FavoritesPage({ searchParams }: Props) {
         createdAt: p.createdAt,
         ownerId: p.ownerId,
         voteCount: p._count.votes,
+        likesCount: p._count.likes,
+        likedByMe: p.likedByMe,
       }))}
       page={result.page}
       totalPages={result.totalPages}

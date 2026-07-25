@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@/lib/generated/prisma";
 
 export type PhraseListMode = "mine" | "public" | "favorites";
+export type PhraseSort = "recent" | "popular";
 
 const PAGE_SIZE = 10;
 
@@ -19,26 +21,37 @@ export type PhraseListItem = {
     email: string;
     image: string | null;
   };
-  _count: { votes: number };
+  _count: { votes: number; likes: number };
+  likedByMe: boolean;
 };
 
 /**
- * Список фраз для кабинета с поиском и пагинацией.
+ * Список фраз для кабинета с поиском, пагинацией и сортировкой.
  */
 export async function listPhrasesForDashboard(options: {
   mode: PhraseListMode;
   userId: string;
   q?: string;
   page?: number;
+  sort?: PhraseSort;
 }): Promise<{
   items: PhraseListItem[];
   total: number;
   page: number;
   pageSize: number;
   totalPages: number;
+  sort: PhraseSort;
 }> {
   const page = Math.max(1, options.page ?? 1);
   const q = options.q?.trim() || undefined;
+  const sort: PhraseSort =
+    options.mode === "public" && options.sort === "popular"
+      ? "popular"
+      : options.sort === "recent"
+        ? "recent"
+        : options.mode === "public"
+          ? (options.sort ?? "recent")
+          : "recent";
 
   const search = q
     ? {
@@ -49,18 +62,25 @@ export async function listPhrasesForDashboard(options: {
       }
     : {};
 
-  const where =
+  const where: Prisma.PhraseWhereInput =
     options.mode === "mine"
       ? { ownerId: options.userId, ...search }
       : options.mode === "favorites"
         ? { ownerId: options.userId, isFavorite: true, ...search }
         : { isPublic: true, ...search };
 
-  const [total, items] = await Promise.all([
+  const orderBy: Prisma.PhraseOrderByWithRelationInput[] =
+    sort === "popular"
+      ? [{ likes: { _count: "desc" } }, { createdAt: "desc" }]
+      : options.mode === "public"
+        ? [{ createdAt: "desc" }]
+        : [{ updatedAt: "desc" }];
+
+  const [total, rows] = await Promise.all([
     prisma.phrase.count({ where }),
     prisma.phrase.findMany({
       where,
-      orderBy: { updatedAt: "desc" },
+      orderBy,
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
       select: {
@@ -75,10 +95,21 @@ export async function listPhrasesForDashboard(options: {
         owner: {
           select: { id: true, name: true, email: true, image: true },
         },
-        _count: { select: { votes: true } },
+        _count: { select: { votes: true, likes: true } },
+        // likedByMe: есть ли лайк текущего пользователя
+        likes: {
+          where: { userId: options.userId },
+          select: { id: true },
+          take: 1,
+        },
       },
     }),
   ]);
+
+  const items: PhraseListItem[] = rows.map(({ likes, ...rest }) => ({
+    ...rest,
+    likedByMe: likes.length > 0,
+  }));
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -88,6 +119,7 @@ export async function listPhrasesForDashboard(options: {
     page,
     pageSize: PAGE_SIZE,
     totalPages,
+    sort,
   };
 }
 

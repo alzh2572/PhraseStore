@@ -14,6 +14,7 @@ import {
   toggleFavorite,
   togglePublic,
 } from "@/app/actions/phrases";
+import { LikeButton } from "@/components/dashboard/LikeButton";
 import { PhraseDialog } from "@/components/dashboard/PhraseDialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,14 +28,22 @@ export type PhraseCardData = {
   createdAt: string | Date;
   ownerId: string;
   voteCount: number;
+  likesCount: number;
+  likedByMe: boolean;
 };
 
 type Props = {
   phrase: PhraseCardData;
   currentUserId: string;
+  /** Показывать кнопку лайка (публичная лента) */
+  showLike?: boolean;
 };
 
-export function PhraseCard({ phrase, currentUserId }: Props) {
+export function PhraseCard({
+  phrase,
+  currentUserId,
+  showLike = false,
+}: Props) {
   const isOwner = phrase.ownerId === currentUserId;
   const [editOpen, setEditOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -117,9 +126,20 @@ export function PhraseCard({ phrase, currentUserId }: Props) {
             ) : null}
           </div>
           <p className="mt-1 line-clamp-2 text-sm text-muted">{phrase.content}</p>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Голосов: {phrase.voteCount} · {dateLabel}
-          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <p className="text-xs text-muted-foreground">{dateLabel}</p>
+            {showLike && phrase.isPublic ? (
+              <LikeButton
+                phraseId={phrase.id}
+                initialLiked={phrase.likedByMe}
+                initialCount={phrase.likesCount}
+              />
+            ) : phrase.likesCount > 0 ? (
+              <p className="text-xs text-muted-foreground">
+                Лайков: {phrase.likesCount}
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
 

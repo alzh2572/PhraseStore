@@ -9,6 +9,7 @@ export const APP_TABLES = [
   "Tag",
   "PhraseTag",
   "Vote",
+  "Like",
 ] as const;
 
 export type AppTable = (typeof APP_TABLES)[number];
@@ -46,6 +47,9 @@ export async function fetchTableRows(
       break;
     case "Vote":
       rows = await prisma.vote.findMany({ orderBy: { createdAt: "desc" }, take });
+      break;
+    case "Like":
+      rows = await prisma.like.findMany({ orderBy: { createdAt: "desc" }, take });
       break;
   }
 
@@ -95,6 +99,7 @@ async function inferEmptyColumns(table: AppTable): Promise<string[]> {
     Tag: ["id", "name"],
     PhraseTag: ["phraseId", "tagId"],
     Vote: ["id", "value", "createdAt", "userId", "phraseId"],
+    Like: ["id", "createdAt", "userId", "phraseId"],
   };
   return defaults[table];
 }

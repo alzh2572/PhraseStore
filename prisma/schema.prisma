@@ -26,6 +26,7 @@ model User {
   notes    Note[]
   phrases  Phrase[]
   votes    Vote[]
+  likes    Like[]
 }
 
 /// OAuth-аккаунт (Google и т.п.), связь provider ↔ User
@@ -106,6 +107,7 @@ model Phrase {
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   votes Vote[]
+  likes Like[]
   tags  PhraseTag[]
 
   @@index([ownerId, updatedAt])
@@ -132,6 +134,21 @@ model PhraseTag {
 model Vote {
   id        String   @id @default(cuid())
   value     Int      @default(1)
+  createdAt DateTime @default(now())
+
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  phraseId String
+  phrase   Phrase @relation(fields: [phraseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, phraseId])
+  @@index([phraseId])
+  @@index([userId])
+}
+
+/// Лайк публичной фразы: 1 пользователь = 1 лайк (toggle).
+model Like {
+  id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
   userId   String

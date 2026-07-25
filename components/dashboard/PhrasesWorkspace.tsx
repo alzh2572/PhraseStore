@@ -7,7 +7,9 @@ import { EmptyState } from "@/components/dashboard/EmptyState";
 import { PhraseCard, type PhraseCardData } from "@/components/dashboard/PhraseCard";
 import { PhraseDialog } from "@/components/dashboard/PhraseDialog";
 import { SearchInput } from "@/components/dashboard/SearchInput";
+import { SortToggle } from "@/components/dashboard/SortToggle";
 import { Button } from "@/components/ui/button";
+import type { PhraseSort } from "@/lib/phrases";
 
 type Props = {
   title: string;
@@ -18,6 +20,9 @@ type Props = {
   totalPages: number;
   total: number;
   showCreate?: boolean;
+  showLike?: boolean;
+  showSort?: boolean;
+  sort?: PhraseSort;
   emptyTitle?: string;
   emptyDescription?: string;
   basePath: string;
@@ -33,6 +38,9 @@ export function PhrasesWorkspace({
   totalPages,
   total,
   showCreate = false,
+  showLike = false,
+  showSort = false,
+  sort = "recent",
   emptyTitle,
   emptyDescription,
   basePath,
@@ -41,6 +49,7 @@ export function PhrasesWorkspace({
   function pageHref(nextPage: number) {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
+    if (showSort && sort) params.set("sort", sort);
     if (nextPage > 1) params.set("page", String(nextPage));
     const qs = params.toString();
     return qs ? `${basePath}?${qs}` : basePath;
@@ -72,9 +81,20 @@ export function PhrasesWorkspace({
         ) : null}
       </div>
 
-      <Suspense fallback={<div className="h-10 max-w-md animate-pulse rounded-lg bg-slate-100" />}>
-        <SearchInput />
-      </Suspense>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Suspense
+          fallback={
+            <div className="h-10 max-w-md flex-1 animate-pulse rounded-lg bg-slate-100" />
+          }
+        >
+          <SearchInput />
+        </Suspense>
+        {showSort ? (
+          <Suspense fallback={null}>
+            <SortToggle current={sort} />
+          </Suspense>
+        ) : null}
+      </div>
 
       {phrases.length === 0 ? (
         <EmptyState title={emptyTitle} description={emptyDescription} />
@@ -90,6 +110,7 @@ export function PhrasesWorkspace({
                 key={phrase.id}
                 phrase={phrase}
                 currentUserId={currentUserId}
+                showLike={showLike}
               />
             ))}
           </div>
