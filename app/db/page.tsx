@@ -21,7 +21,7 @@ type DbPageProps = {
 export default async function DbPage({ searchParams }: DbPageProps) {
   const session = await auth();
   if (!session?.user?.id) {
-    redirect("/");
+    redirect("/login");
   }
 
   const params = await searchParams;

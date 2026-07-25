@@ -28,8 +28,8 @@ export const authConfig = {
     }),
   ],
   pages: {
-    signIn: "/",
-    error: "/",
+    signIn: "/login",
+    error: "/login",
   },
   callbacks: {
     authorized({ auth, request }) {
@@ -45,7 +45,8 @@ export const authConfig = {
         return isLoggedIn;
       }
 
-      if ((pathname === "/" || pathname.startsWith("/login")) && isLoggedIn) {
+      // Уже вошёл — со страницы логина в кабинет (главная остаётся публичной)
+      if (pathname.startsWith("/login") && isLoggedIn) {
         return Response.redirect(new URL("/dashboard", request.nextUrl));
       }
 

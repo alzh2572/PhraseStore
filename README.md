@@ -66,18 +66,17 @@ npm run dev
 ```
 
 Защищены middleware: `/db`, `/dashboard`, `/my-phrases`.  
-Сессии: JWT (совместимо с Edge middleware) + Prisma Adapter (User в БД при первом входе).
+Сессии: JWT + Prisma Adapter. Главная `/` публичная (без редиректа в кабинет).
 
-### Личный кабинет
+### Публичный сайт
 
 | Маршрут | Содержание |
 |---|---|
-| `/dashboard` | Мои фразы/цитаты (CRUD, избранное, public/private) |
-| `/dashboard/public` | Публичные фразы |
-| `/dashboard/favorites` | Избранное |
-| `/dashboard/history` | Заглушка |
-| `/dashboard/settings` | Заглушка |
-| `/dashboard/profile` | Профиль |
+| `/` | Hero + Новые + Популярные (только PUBLIC) |
+| `/catalog` | Каталог публичных фраз |
+| `/phrase/[id]` | Страница фразы |
+| `/login` | Вход через Google |
+| `/dashboard` | Кабинет (CRUD, только auth) |
 
 ```powershell
 # миграции (локально)

@@ -18,7 +18,7 @@ function parseSort(value: string | undefined): PhraseSort {
 
 export default async function PublicPhrasesPage({ searchParams }: Props) {
   const session = await auth();
-  if (!session?.user?.id) redirect("/");
+  if (!session?.user?.id) redirect("/login");
 
   const params = await searchParams;
   const page = Number(params.page ?? "1") || 1;

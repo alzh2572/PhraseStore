@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { ThumbsUp } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -8,6 +9,8 @@ type Props = {
   phraseId: string;
   initialLiked: boolean;
   initialCount: number;
+  /** Если задан — при 401 показываем ссылку на вход */
+  loginHref?: string;
 };
 
 /**
@@ -17,6 +20,7 @@ export function LikeButton({
   phraseId,
   initialLiked,
   initialCount,
+  loginHref,
 }: Props) {
   const [liked, setLiked] = useState(initialLiked);
   const [count, setCount] = useState(initialCount);
@@ -28,7 +32,6 @@ export function LikeButton({
 
     const prevLiked = liked;
     const prevCount = count;
-    // Оптимистичное обновление
     setLiked(!prevLiked);
     setCount(Math.max(0, prevCount + (prevLiked ? -1 : 1)));
     setLoading(true);
@@ -93,6 +96,14 @@ export function LikeButton({
       {error ? (
         <span className="text-xs text-danger" role="alert">
           {error}
+          {loginHref ? (
+            <>
+              {" "}
+              <Link href={loginHref} className="underline">
+                Войти
+              </Link>
+            </>
+          ) : null}
         </span>
       ) : null}
     </div>

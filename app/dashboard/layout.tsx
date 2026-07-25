@@ -14,7 +14,7 @@ export default async function DashboardLayout({
 }) {
   const session = await auth();
   if (!session?.user?.id) {
-    redirect("/");
+    redirect("/login");
   }
 
   const { user } = session;
@@ -23,7 +23,7 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="flex h-14 items-center justify-between border-b border-border bg-white px-4 sm:px-6">
-        <Link href="/dashboard" className="text-lg font-bold text-slate-900">
+        <Link href="/" className="text-lg font-bold text-slate-900">
           PhraseStore
         </Link>
         <div className="flex items-center gap-3">
