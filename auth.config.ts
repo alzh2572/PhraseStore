@@ -38,7 +38,6 @@ export const authConfig = {
 
       const isProtected =
         pathname.startsWith("/db") ||
-        pathname.startsWith("/view-db") ||
         pathname.startsWith("/dashboard") ||
         pathname.startsWith("/my-phrases");
 

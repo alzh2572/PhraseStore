@@ -47,8 +47,6 @@ export default async function DbPage({ searchParams }: DbPageProps) {
         <h1>База данных</h1>
         <p className={styles.lead}>
           Вы вошли как {session.user.email}. Выберите таблицу.{" "}
-          <Link href="/view-db">view-db (CRUD)</Link>
-          {" · "}
           <Link href="/dashboard">Кабинет</Link>
         </p>
       </header>

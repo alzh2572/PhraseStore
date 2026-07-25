@@ -1,12 +1,11 @@
-# ⏳ SESSION HANDOFF (as of 24.07.26)
+# ⏳ SESSION HANDOFF (as of 25.07.26)
 
 ## Что делать дальше (по приоритету)
 
 1. **Добить Google OAuth на Vercel** — в ошибке Google явно видно, что приложение шлёт callback как `http://phrase-store-five.vercel.app/...`, а нужен **`https://`**. В Vercel Production Env выставить `AUTH_URL=https://phrase-store-five.vercel.app` (без слэша), Redeploy. В Google Console → Authorized redirect URIs добавить **точно** `https://phrase-store-five.vercel.app/api/auth/callback/google` (+ localhost для dev). Пока это не совпадёт — вход на проде не заработает.
 2. **Проверить полный happy-path на проде после фикса URI**: `/` → Google → `/db` → данные из Neon; выход; повторный вход; `/my-phrases` / `/dashboard` под middleware.
 3. **Прогнать `prisma migrate deploy` на Neon с Vercel build** — история `_prisma_migrations` на Neon уже вручную выровнена под репо; после следующего успешного деплоя убедиться, что build больше не падает на `P3009`.
-4. **Продуктовый слой поверх auth** (осознанно не начат в этой сессии): создание/редактирование своих Phrase в UI, публичная лента, голосование с проверкой PUBLIC, нормальный UX кабинета вместо «сырого» просмотра всех таблиц.
-5. **Решить судьбу view-db на проде**: сейчас CRUD к БД в development-only (`NODE_ENV=production` → 403). Если нужен на Vercel — только за auth + жёсткие ограничения, иначе оставить как локальный инструмент.
+4. **Продуктовый слой поверх auth** (осознанно не начат): создание/редактирование своих Phrase в UI, публичная лента, голосование с проверкой PUBLIC, нормальный UX кабинета вместо «сырого» просмотра всех таблиц.
 
 ---
 
@@ -15,10 +14,8 @@
 | | |
 |---|---|
 | **Worktree** | `C:/Work/PhraseStore` (единственный) |
-| **Ветка** | `main` @ `6f409b0`, tracking `origin/main`, **up to date** |
-| **Working tree** | clean |
+| **Ветка** | `main` (см. актуальный `git status` / `git log -1`) |
 | **Открытые PR** | **нет** (репозиторий `alzh2572/PhraseStore`; история шла прямыми пушами в `main`) |
-| **Смерженные PR** | не использовались в этой сессии |
 
 Production URL проекта на Vercel: **https://phrase-store-five.vercel.app**
 
@@ -26,18 +23,26 @@ Production URL проекта на Vercel: **https://phrase-store-five.vercel.ap
 
 ## Что специально НЕ начато
 
-- UI создания/редактирования фраз пользователем (только просмотр таблиц + `/my-phrases` read-only из БД).
+- UI создания/редактирования фраз пользователем (только просмотр таблиц `/db` read-only из БД).
 - Публичная витрина фраз / поиск / теги / категории в продуктовом UI.
 - Голосование (Vote) в UI и enforcement «голос только за PUBLIC» на уровне API/триггера.
 - Collection/Folder и PhraseVersion из `DATABASE.md` (были помечены как optional).
 - Полноценный Auth.js **database session strategy** в middleware (осознанно ушли на JWT из‑за Edge).
-- Открытие view-db на production Vercel.
 - Синхронизация local ↔ Neon как регулярный процесс (есть разовые скрипты, не продукт).
 - Переименование `middleware.ts` → `proxy.ts` (Next 16 предупреждает, но не трогали).
 
 ---
 
-## Неочевидные решения этой сессии (ПОЧЕМУ)
+## Сделано 25.07.26
+
+- **view-db вынесен из основного приложения** в отдельный локальный инструмент `tools/view-db`.
+  - Запуск: `npm run view-db` → `http://127.0.0.1:3010` (bind только localhost).
+  - Удалены маршруты `/view-db`, ссылки в nav/`/db`, matcher в middleware и `auth.config`.
+  - На Vercel CRUD к БД больше не входит в бандл PhraseStore.
+
+---
+
+## Неочевидные решения (ПОЧЕМУ)
 
 1. **JWT + Prisma Adapter, а не database sessions в middleware**  
    Database sessions + импорт `auth.ts` (Prisma) в Edge middleware давали `node:util/types` / native module not found. Разделили: `auth.config.ts` (edge) для middleware, `auth.ts` (Node + adapter) для route handlers/RSC. User всё равно создаётся в БД при первом Google-входе; `user.id` кладётся в JWT → `session.user.id`.
@@ -49,10 +54,10 @@ Production URL проекта на Vercel: **https://phrase-store-five.vercel.ap
    В Neon копились чужие/старые имена миграций + failed `20260724160000_init` → Vercel build `P3009`. Репо держит две миграции (`…160000_init`, `…170000_auth_google`). Историю на Neon переписали под них вручную (скрипт через pooler), иначе `migrate deploy` в `npm run build` вечно валил деплой.
 
 4. **Стартовый UX: `/` = бренд + Google, БД только после входа**  
-   Просмотр таблиц перенесён на `/db` (+ `/view-db`), middleware закрывает эти пути. `/login` редиректит на `/`. Вход на проде ведёт на `/api/auth/google` → `signIn("google")`, чтобы OAuth URL собирался на Node, а не ломался server action / битым query.
+   Просмотр таблиц на `/db`, middleware закрывает путь. `/login` редиректит на `/`. Вход на проде ведёт на `/api/auth/google` → `signIn("google")`, чтобы OAuth URL собирался на Node.
 
-5. **view-db только в development**  
-   Полный CRUD к local/remote БД без отдельной авторизации на публичном Vercel = дыра. Guard по `NODE_ENV`.
+5. **view-db — отдельная программа, не route в Next**  
+   Полный SQL CRUD рядом с публичным OAuth-приложением рискован даже «за логином» / `NODE_ENV`. Вынесен в `tools/view-db` (Node HTTP на `127.0.0.1`), основной app только read-only `/db`.
 
 6. **`AUTH_URL` обязан совпадать со схемой и хостом браузера**  
    Реальный fail на проде: приложение слало `redirect_uri=http://phrase-store-five.vercel.app/...` при живом `https://` сайте → Google `redirect_uri_mismatch`. Недостаточно «добавить URI» — нужна именно **https** в `AUTH_URL` на Vercel.
@@ -70,4 +75,4 @@ Production URL проекта на Vercel: **https://phrase-store-five.vercel.ap
 7. **В Google Console URI должен совпасть символ-в-символ** (схема, хост, путь `/api/auth/callback/google`, без trailing slash). Origins отдельно: `https://phrase-store-five.vercel.app`.
 8. **Клиент OAuth = Web application**; в ошибках фигурировало имя приложения «Potato App» в Console — это branding клиента, не баг PhraseStore.
 9. **После смены Env на Vercel нужен Redeploy** — иначе рантайм продолжит старый `AUTH_URL=http://...`.
-10. **Не путать «таблицы не видны»**: главная `/` больше не показывает БД; без сессии пользователь увидит только login. Данные — `/db` после Google.
+10. **Не путать «таблицы не видны»**: главная `/` больше не показывает БД; без сессии пользователь увидит только login. Данные — `/db` после Google. CRUD — только `npm run view-db` локально.

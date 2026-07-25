@@ -1,3 +1,35 @@
+:root {
+  color-scheme: light;
+  --bg: #f6f4ef;
+  --fg: #1a1a1a;
+  --muted: #5c5c5c;
+  --line: #d9d4c8;
+  --accent: #0f5c4c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background:
+    radial-gradient(circle at top left, #fff8e8 0%, transparent 45%),
+    linear-gradient(180deg, #f6f4ef 0%, #ebe6dc 100%);
+  color: var(--fg);
+}
+
+a {
+  color: inherit;
+}
+
 .main {
   max-width: 72rem;
   margin: 0 auto;
@@ -14,15 +46,11 @@
   color: var(--muted);
 }
 
-.backLink {
+.badge {
   display: inline-block;
   margin-bottom: 1rem;
-  color: var(--accent);
-  text-decoration: none;
-}
-
-.backLink:hover {
-  text-decoration: underline;
+  font-size: 0.85rem;
+  color: var(--muted);
 }
 
 .dbSelector {
@@ -197,4 +225,20 @@
 
 .muted {
   color: var(--muted);
+}
+
+.backLink {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: var(--accent);
+  text-decoration: none;
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.backLink:hover {
+  text-decoration: underline;
 }

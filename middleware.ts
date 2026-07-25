@@ -10,7 +10,6 @@ export default NextAuth(authConfig).auth;
 export const config = {
   matcher: [
     "/db/:path*",
-    "/view-db/:path*",
     "/dashboard/:path*",
     "/my-phrases/:path*",
     "/login",

@@ -56,7 +56,7 @@ http://localhost:3000 — данные из **локального** Postgres.
 
 Сценарий:
 1. `/` — название **PhraseStore** + кнопка «Войти через Google»
-2. После входа — доступ к БД: `/db` (таблицы), `/view-db` (CRUD)
+2. После входа — доступ к БД: `/db` (read-only таблицы)
 
 ```powershell
 # В .env: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, AUTH_SECRET, AUTH_URL
@@ -64,17 +64,19 @@ npm run dev
 # http://localhost:3000
 ```
 
-Защищены middleware: `/db`, `/view-db`, `/dashboard`, `/my-phrases`.  
+Защищены middleware: `/db`, `/dashboard`, `/my-phrases`.  
 Сессии: JWT (совместимо с Edge middleware) + Prisma Adapter (User в БД при первом входе).
 
-### view-db (тест)
+### view-db (отдельный локальный инструмент)
+
+CRUD к БД — **не** часть PhraseStore / Vercel. Отдельная программа в `tools/view-db`, слушает только `127.0.0.1`.
 
 ```powershell
-npm run dev
-# откройте http://localhost:3000/view-db
+npm run view-db
+# http://127.0.0.1:3010
 ```
 
-Выбор локальной или рабочей БД (`DATABASE_URL_LOCAL` / `DATABASE_URL_REMOTE`), список таблиц, пагинация и CRUD. Только в `development`.
+Выбор локальной или рабочей БД (`DATABASE_URL_LOCAL` / `DATABASE_URL_REMOTE`), список таблиц, пагинация и CRUD.
 
 ## Переменные окружения
 
@@ -98,4 +100,5 @@ npm run db:migrate   # prisma migrate dev  (локально)
 npm run db:deploy    # prisma migrate deploy (prod / Neon)
 npm run db:seed
 npm run db:studio
+npm run view-db      # локальный CRUD-просмотрщик БД (:3010)
 ```

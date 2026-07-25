@@ -38,7 +38,6 @@ export default async function RootLayout({
               style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}
             >
               <Link href="/db">БД</Link>
-              <Link href="/view-db">view-db</Link>
               <Link href="/dashboard">Кабинет</Link>
               <Link href="/my-phrases">Мои фразы</Link>
               <form
